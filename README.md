@@ -48,7 +48,7 @@ Run it manually with:
 ```bash
 ./system_maintenance.sh
 ```
-# Important note:
+### Important note:
 Do NOT run with sudo, if passwweord is required it will ask!
 
 ---
