@@ -49,7 +49,7 @@ Run it manually with:
 ./system_maintenance.sh
 ```
 ### Important note:
-Do NOT run with sudo, if passwweord is required it will ask!
+Do NOT run with sudo, if password is required it will ask!
 
 ---
 
