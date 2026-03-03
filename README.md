@@ -1,137 +1,49 @@
-## System Maintenance Script (Arch Linux)
+# update.sh
 
-### Overview
+A single maintenance script for Arch Linux + KDE Plasma. Updates packages, cleans up cruft, and refreshes desktop/KDE databases so icons and apps stay in sync.
 
-This script automates regular system maintenance tasks for Arch-based distributions.
-It updates system packages, upgrades AUR packages, removes orphaned dependencies, cleans package caches, and updates system databases.
-
-### Script
-
-Save the following as `system_maintenance.sh`:
+## Usage
 
 ```bash
-#!/bin/bash
-
-# Update official repositories
-sudo pacman -Syu
-
-# Update AUR packages (requires yay)
-yay -Sua
-
-# Remove orphaned packages
-orphans=$(pacman -Qtdq 2>/dev/null)
-if [ -n "$orphans" ]; then
-    sudo pacman -Rns $orphans --noconfirm
-else
-    echo "No orphaned packages found."
-fi
-
-# Clean old package cache
-sudo pacman -Sc --noconfirm
-
-# Optionally, clean *all* cache (uncomment if desired)
-# sudo pacman -Scc
-
-# Update locate and man databases
-sudo updatedb
-sudo mandb
+chmod +x update.sh
+./update.sh
 ```
 
-Make it executable:
+### Flags
 
+| Flag | Short | Description |
+|------|-------|-------------|
+| `--verbose` | `-v` | Show detailed/debug output |
+| `--dry-run` | `-n` | Preview all steps without making any changes |
+| `--clear-logs` | `-c` | Delete old log files from `/tmp` and exit |
+| `--help` | `-h` | Show usage info and exit |
+
+## What It Does
+
+| Step | Task |
+|------|------|
+| 1 | Update pacman, AUR (yay), and Flatpak packages |
+| 2 | Remove orphan packages |
+| 3 | Clean pacman and yay caches |
+| 4 | Vacuum systemd journal logs (keeps last 3 days) |
+| 5 | Update `locate` and `man` databases |
+| 6 | Clear KDE, thumbnail, and user caches |
+| 7 | Rebuild user and system desktop file databases |
+| 8 | Rebuild KDE service cache (`kbuildsycoca6/5`) |
+
+## Logs
+
+Each run writes a timestamped log to `/tmp/system-update-YYYYMMDD-HHMMSS.log`.
+
+To clean up old logs:
 ```bash
-chmod +x system_maintenance.sh
+./update.sh --clear-logs
 ```
 
-Run it manually with:
+## Dependencies
 
-```bash
-./system_maintenance.sh
-```
-### Important note:
-Do NOT run with sudo, if password is required it will ask!
-
----
-
-## Run on Startup
-
-There are two common methods to run this script automatically at startup (or on a schedule):
-
-### **Option 1: systemd Service**
-
-1. Create a systemd service file:
-
-   ```bash
-   sudo nano /etc/systemd/system/system-maintenance.service
-   ```
-2. Paste this content:
-
-   ```ini
-   [Unit]
-   Description=System Maintenance Script
-   After=network-online.target
-
-   [Service]
-   Type=oneshot
-   ExecStart=/path/to/system_maintenance.sh
-   StandardOutput=journal
-   StandardError=journal
-
-   [Install]
-   WantedBy=default.target
-   ```
-3. Enable it to run at boot:
-
-   ```bash
-   sudo systemctl enable system-maintenance.service
-   ```
-4. Test it manually:
-
-   ```bash
-   sudo systemctl start system-maintenance.service
-   ```
-
----
-
-### **Option 2: Cron Job (@reboot)**
-
-If you prefer `cron`:
-
-1. Open your user’s crontab:
-
-   ```bash
-   crontab -e
-   ```
-2. Add this line:
-
-   ```bash
-   @reboot /path/to/system_maintenance.sh
-   ```
-3. Save and exit.
-
-> **Tip:** You can also schedule it weekly:
->
-> ```bash
-> 0 8 * * 1 /path/to/system_maintenance.sh
-> ```
->
-> (Runs every Monday at 8 AM)
-
----
-
-### Requirements
-
-* Arch-based Linux distribution
-* `yay` installed (for AUR updates)
-* Root privileges for system operations
-
----
-
-### Optional Improvements
-
-* Log output to a file:
-
-  ```bash
-  ./system_maintenance.sh | tee -a ~/maintenance.log
-  ```
-* Schedule with `systemd` timer instead of `cron` for better integration.
+- [`yay`](https://github.com/Jguer/yay) — AUR helper
+- `flatpak` — for Flatpak package updates
+- `mlocate` / `plocate` — for `updatedb`
+- `man-db` — for `mandb`
+- `kbuildsycoca6` or `kbuildsycoca5` — KDE cache rebuild (auto-detected)
