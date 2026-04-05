@@ -42,7 +42,7 @@ To clean up old logs:
 
 ## Dependencies
 
-- [`yay`](https://github.com/Jguer/yay) — AUR helper
+- [`yay`](https://github.com/Jguer/yay) - AUR helper
 - `flatpak` — for Flatpak package updates
 - `mlocate` / `plocate` — for `updatedb`
 - `man-db` — for `mandb`
