@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+
+echo "--- Starting System Update ---"
+yay -Syu
+
+echo "--- Cleaning Package Cache ---"
+sudo paccache -rk1
+sudo paccache -ruk0
+
+echo "--- Removing Orphaned Packages ---"
+if [ -n "$(pacman -Qqdt)" ]; then
+    sudo pacman -Rns $(pacman -Qqdtq)
+else
+    echo "No orphaned packages found."
+fi
+
+echo "--- Checking for .pacnew files ---"
+pacdiff -s
+
+echo "--- Updating Man Pages ---"
+sudo mandb
